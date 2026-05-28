@@ -16,6 +16,7 @@ dependencies = [
   "matplotlib>=3.9",
   "nlpaug",
   "sentencepiece>=0.2",
+  "emoji>=2.12",
 ]
 
 [project.scripts]

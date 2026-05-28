@@ -4,6 +4,11 @@ import re
 from dataclasses import dataclass
 from typing import Iterable, List, Sequence, Tuple
 
+try:
+    import emoji
+except Exception:  # pragma: no cover
+    emoji = None
+
 
 _RE_HTML = re.compile(r"<br\s*/?>", re.IGNORECASE)
 _RE_NON_WORD = re.compile(r"[^\w\s'-]+", re.UNICODE)
@@ -14,6 +19,9 @@ _RE_NUM = re.compile(r"\d+")
 def clean_text(text: str, *, remove_numbers: bool = True) -> str:
     t = text or ""
     t = _RE_HTML.sub(" ", t)
+    if emoji is not None:
+        # Convert emoji glyphs into normalized text tokens, e.g. 😊 -> :smiling_face_with_smiling_eyes:
+        t = emoji.demojize(t, language="en")
     t = t.lower()
     t = t.replace("\u2019", "'").replace("\u2018", "'").replace("\u201c", '"').replace("\u201d", '"')
     if remove_numbers:
