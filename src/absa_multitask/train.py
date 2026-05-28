@@ -12,7 +12,7 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from .data import Absadataset, build_vocab, collate_fn
+from .data import LABEL_UNK, Absadataset, build_vocab, collate_fn
 from .model import CnnOnlyMultitaskModel, MultitaskAbsaModel
 from .textproc import build_examples
 
@@ -26,8 +26,15 @@ class VocabPack:
 
 
 def build_label_vocab(labels: List[str]) -> Dict[str, int]:
-    uniq = sorted(set(map(str, labels)))
-    return {lab: i for i, lab in enumerate(uniq)}
+    norm = [str(x).strip() for x in labels]
+    uniq = sorted(set(norm))
+    # Reserve an UNK label to avoid KeyError on unseen labels in val/test.
+    out: Dict[str, int] = {LABEL_UNK: 0}
+    for lab in uniq:
+        if lab == LABEL_UNK:
+            continue
+        out.setdefault(lab, len(out))
+    return out
 
 
 def accuracy_from_logits(logits: torch.Tensor, y: torch.Tensor) -> float:
@@ -55,8 +62,8 @@ def main(argv: List[str] | None = None) -> None:
     df = df.dropna(subset=[args.text_col, args.aspect_col, args.sentiment_col])
 
     texts = df[args.text_col].astype(str).tolist()
-    aspects = df[args.aspect_col].astype(str).tolist()
-    sentiments = df[args.sentiment_col].astype(str).tolist()
+    aspects = df[args.aspect_col].astype(str).map(lambda x: str(x).strip()).tolist()
+    sentiments = df[args.sentiment_col].astype(str).map(lambda x: str(x).strip()).tolist()
 
     examples = build_examples(texts, aspects, sentiments)
     if len(examples) < 10:

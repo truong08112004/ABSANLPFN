@@ -14,7 +14,7 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from .data import Absadataset, build_vocab, collate_fn
+from .data import LABEL_UNK, Absadataset, build_vocab, collate_fn
 from .model import MultitaskAbsaModel
 from .textproc import build_examples
 from .transformer_model import TransformerMtlModel
@@ -26,8 +26,14 @@ except Exception:  # pragma: no cover
 
 
 def build_label_vocab(labels: List[str]) -> Dict[str, int]:
-    uniq = sorted(set(map(str, labels)))
-    return {lab: i for i, lab in enumerate(uniq)}
+    norm = [str(x).strip() for x in labels]
+    uniq = sorted(set(norm))
+    out: Dict[str, int] = {LABEL_UNK: 0}
+    for lab in uniq:
+        if lab == LABEL_UNK:
+            continue
+        out.setdefault(lab, len(out))
+    return out
 
 
 @dataclass(frozen=True)
@@ -202,8 +208,8 @@ def main(argv: List[str] | None = None) -> None:
     if args.max_samples and args.max_samples > 0:
         df = df.sample(n=min(args.max_samples, len(df)), random_state=42).reset_index(drop=True)
     texts = df[args.text_col].astype(str).tolist()
-    aspects = df[args.aspect_col].astype(str).tolist()
-    sentiments = df[args.sentiment_col].astype(str).tolist()
+    aspects = df[args.aspect_col].astype(str).map(lambda x: str(x).strip()).tolist()
+    sentiments = df[args.sentiment_col].astype(str).map(lambda x: str(x).strip()).tolist()
 
     # Split theo dòng để dùng chung cho cả 2 mô hình.
     idx = np.arange(len(texts))

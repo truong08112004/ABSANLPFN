@@ -12,6 +12,7 @@ from .textproc import Example
 
 PAD_TOKEN = "<PAD>"
 UNK_TOKEN = "<UNK>"
+LABEL_UNK = "<UNK_LABEL>"
 
 
 def build_vocab(seqs: Sequence[Sequence[str]], *, min_freq: int = 1) -> Dict[str, int]:
@@ -70,6 +71,8 @@ class Absadataset(Dataset):
         self.aspect_vocab = aspect_vocab
         self.sentiment_vocab = sentiment_vocab
         self.max_len = max_len
+        self._unk_aspect = aspect_vocab.get(LABEL_UNK, 0)
+        self._unk_sentiment = sentiment_vocab.get(LABEL_UNK, 0)
 
     def __len__(self) -> int:
         return len(self.examples)
@@ -78,8 +81,8 @@ class Absadataset(Dataset):
         ex = self.examples[idx]
         w = encode_seq(ex.tokens, self.word_vocab, self.max_len)
         p = encode_seq(ex.pos, self.pos_vocab, self.max_len)
-        ya = self.aspect_vocab[ex.aspect]
-        ys = self.sentiment_vocab[ex.sentiment]
+        ya = self.aspect_vocab.get(ex.aspect, self._unk_aspect)
+        ys = self.sentiment_vocab.get(ex.sentiment, self._unk_sentiment)
         return w, p, ya, ys
 
 

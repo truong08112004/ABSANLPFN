@@ -81,6 +81,9 @@ def build_examples(
         if not toks:
             continue
         pos = pos_tags(toks)
-        out.append(Example(tokens=toks, pos=pos, aspect=str(asp), sentiment=str(sent)))
+        # Normalize labels to reduce accidental label explosion from whitespace/None.
+        aspect = str(asp).strip()
+        sentiment = str(sent).strip()
+        out.append(Example(tokens=toks, pos=pos, aspect=aspect, sentiment=sentiment))
     return out
 
