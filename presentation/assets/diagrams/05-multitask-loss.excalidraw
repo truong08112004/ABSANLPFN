@@ -1,0 +1,324 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "mcp-excalidraw-server",
+  "elements": [
+    {
+      "id": "title",
+      "type": "text",
+      "x": 280,
+      "y": 20,
+      "strokeColor": "#9c36b5",
+      "text": "Multitask Learning",
+      "fontSize": 26,
+      "createdAt": "2026-05-28T18:09:03.126Z",
+      "updatedAt": "2026-05-28T18:09:03.126Z",
+      "version": 1
+    },
+    {
+      "id": "back",
+      "type": "rectangle",
+      "x": 280,
+      "y": 80,
+      "width": 320,
+      "height": 80,
+      "backgroundColor": "#eebefa",
+      "strokeColor": "#9c36b5",
+      "label": {
+        "text": "Shared Backbone\n(CNN+BiLSTM hoặc BERT)"
+      },
+      "fontSize": 16,
+      "createdAt": "2026-05-28T18:09:03.126Z",
+      "updatedAt": "2026-05-28T18:09:03.126Z",
+      "version": 1
+    },
+    {
+      "id": "ha",
+      "type": "rectangle",
+      "x": 120,
+      "y": 240,
+      "width": 200,
+      "height": 70,
+      "backgroundColor": "#ffc9c9",
+      "strokeColor": "#e03131",
+      "label": {
+        "text": "Head Aspect\nCrossEntropyLoss"
+      },
+      "fontSize": 14,
+      "createdAt": "2026-05-28T18:09:03.126Z",
+      "updatedAt": "2026-05-28T18:09:03.126Z",
+      "version": 1
+    },
+    {
+      "id": "hs",
+      "type": "rectangle",
+      "x": 560,
+      "y": 240,
+      "width": 200,
+      "height": 70,
+      "backgroundColor": "#ffc9c9",
+      "strokeColor": "#e03131",
+      "label": {
+        "text": "Head Sentiment\nCrossEntropyLoss"
+      },
+      "fontSize": 14,
+      "createdAt": "2026-05-28T18:09:03.126Z",
+      "updatedAt": "2026-05-28T18:09:03.126Z",
+      "version": 1
+    },
+    {
+      "id": "la",
+      "type": "rectangle",
+      "x": 120,
+      "y": 380,
+      "width": 200,
+      "height": 55,
+      "backgroundColor": "#ffd8a8",
+      "strokeColor": "#e8590c",
+      "label": {
+        "text": "L_aspect"
+      },
+      "fontSize": 16,
+      "createdAt": "2026-05-28T18:09:03.126Z",
+      "updatedAt": "2026-05-28T18:09:03.126Z",
+      "version": 1
+    },
+    {
+      "id": "ls",
+      "type": "rectangle",
+      "x": 560,
+      "y": 380,
+      "width": 200,
+      "height": 55,
+      "backgroundColor": "#ffd8a8",
+      "strokeColor": "#e8590c",
+      "label": {
+        "text": "L_sentiment"
+      },
+      "fontSize": 16,
+      "createdAt": "2026-05-28T18:09:03.127Z",
+      "updatedAt": "2026-05-28T18:09:03.127Z",
+      "version": 1
+    },
+    {
+      "id": "lt",
+      "type": "rectangle",
+      "x": 300,
+      "y": 500,
+      "width": 280,
+      "height": 70,
+      "backgroundColor": "#b2f2bb",
+      "strokeColor": "#2f9e44",
+      "label": {
+        "text": "L = L_aspect + L_sentiment"
+      },
+      "fontSize": 18,
+      "createdAt": "2026-05-28T18:09:03.127Z",
+      "updatedAt": "2026-05-28T18:09:03.127Z",
+      "version": 1
+    },
+    {
+      "id": "opt",
+      "type": "rectangle",
+      "x": 300,
+      "y": 620,
+      "width": 280,
+      "height": 60,
+      "backgroundColor": "#e9ecef",
+      "strokeColor": "#1e1e1e",
+      "label": {
+        "text": "Backprop + Optimizer\n(Adam / RMSprop)"
+      },
+      "fontSize": 14,
+      "createdAt": "2026-05-28T18:09:03.127Z",
+      "updatedAt": "2026-05-28T18:09:03.127Z",
+      "version": 1
+    },
+    {
+      "id": "m1",
+      "type": "arrow",
+      "x": 376.6859469865651,
+      "y": 164.60762825946549,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -100.46866816667864,
+          70.78474348106903
+        ]
+      ],
+      "start": {
+        "id": "back"
+      },
+      "end": {
+        "id": "ha"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-05-28T18:09:03.127Z",
+      "updatedAt": "2026-05-28T18:09:03.127Z",
+      "version": 1
+    },
+    {
+      "id": "m2",
+      "type": "arrow",
+      "x": 503.3140530134349,
+      "y": 164.60762825946549,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          100.46866816667853,
+          70.78474348106903
+        ]
+      ],
+      "start": {
+        "id": "back"
+      },
+      "end": {
+        "id": "hs"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-05-28T18:09:03.127Z",
+      "updatedAt": "2026-05-28T18:09:03.127Z",
+      "version": 1
+    },
+    {
+      "id": "m3",
+      "type": "arrow",
+      "x": 220,
+      "y": 318,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          54
+        ]
+      ],
+      "start": {
+        "id": "ha"
+      },
+      "end": {
+        "id": "la"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-05-28T18:09:03.127Z",
+      "updatedAt": "2026-05-28T18:09:03.127Z",
+      "version": 1
+    },
+    {
+      "id": "m4",
+      "type": "arrow",
+      "x": 660,
+      "y": 318,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          54
+        ]
+      ],
+      "start": {
+        "id": "hs"
+      },
+      "end": {
+        "id": "ls"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-05-28T18:09:03.127Z",
+      "updatedAt": "2026-05-28T18:09:03.127Z",
+      "version": 1
+    },
+    {
+      "id": "m5",
+      "type": "arrow",
+      "x": 274.372594957237,
+      "y": 439.01139025930786,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          98.31363361493771,
+          56.97721948138428
+        ]
+      ],
+      "start": {
+        "id": "la"
+      },
+      "end": {
+        "id": "lt"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-05-28T18:09:03.127Z",
+      "updatedAt": "2026-05-28T18:09:03.127Z",
+      "version": 1
+    },
+    {
+      "id": "m6",
+      "type": "arrow",
+      "x": 605.627405042763,
+      "y": 439.01139025930786,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -98.31363361493777,
+          56.97721948138428
+        ]
+      ],
+      "start": {
+        "id": "ls"
+      },
+      "end": {
+        "id": "lt"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-05-28T18:09:03.127Z",
+      "updatedAt": "2026-05-28T18:09:03.127Z",
+      "version": 1
+    },
+    {
+      "id": "m7",
+      "type": "arrow",
+      "x": 440,
+      "y": 578,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          34
+        ]
+      ],
+      "start": {
+        "id": "lt"
+      },
+      "end": {
+        "id": "opt"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-05-28T18:09:03.127Z",
+      "updatedAt": "2026-05-28T18:09:03.127Z",
+      "version": 1
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#ffffff",
+    "gridSize": null
+  }
+}

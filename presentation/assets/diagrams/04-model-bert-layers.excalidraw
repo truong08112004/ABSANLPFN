@@ -1,0 +1,298 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "mcp-excalidraw-server",
+  "elements": [
+    {
+      "id": "title",
+      "type": "text",
+      "x": 40,
+      "y": 20,
+      "strokeColor": "#1971c2",
+      "text": "Model B: BERT-MTL (bert-base-uncased)",
+      "fontSize": 24,
+      "createdAt": "2026-05-28T18:08:48.206Z",
+      "updatedAt": "2026-05-28T18:08:48.206Z",
+      "version": 1
+    },
+    {
+      "id": "txt",
+      "type": "rectangle",
+      "x": 40,
+      "y": 100,
+      "width": 160,
+      "height": 70,
+      "backgroundColor": "#a5d8ff",
+      "strokeColor": "#1971c2",
+      "label": {
+        "text": "reviewText"
+      },
+      "fontSize": 15,
+      "createdAt": "2026-05-28T18:08:48.206Z",
+      "updatedAt": "2026-05-28T18:08:48.206Z",
+      "version": 1
+    },
+    {
+      "id": "tok",
+      "type": "rectangle",
+      "x": 240,
+      "y": 100,
+      "width": 180,
+      "height": 70,
+      "backgroundColor": "#ffffff",
+      "strokeColor": "#1e1e1e",
+      "label": {
+        "text": "BERT Tokenizer\npadding, truncation"
+      },
+      "fontSize": 14,
+      "createdAt": "2026-05-28T18:08:48.206Z",
+      "updatedAt": "2026-05-28T18:08:48.206Z",
+      "version": 1
+    },
+    {
+      "id": "enc",
+      "type": "rectangle",
+      "x": 460,
+      "y": 85,
+      "width": 220,
+      "height": 100,
+      "backgroundColor": "#eebefa",
+      "strokeColor": "#9c36b5",
+      "label": {
+        "text": "Transformer Encoder\n12 layers, hidden=768"
+      },
+      "fontSize": 14,
+      "createdAt": "2026-05-28T18:08:48.206Z",
+      "updatedAt": "2026-05-28T18:08:48.206Z",
+      "version": 1
+    },
+    {
+      "id": "cls",
+      "type": "rectangle",
+      "x": 720,
+      "y": 100,
+      "width": 140,
+      "height": 70,
+      "backgroundColor": "#ffd8a8",
+      "strokeColor": "#e8590c",
+      "label": {
+        "text": "CLS token\n[768-d]"
+      },
+      "fontSize": 14,
+      "createdAt": "2026-05-28T18:08:48.206Z",
+      "updatedAt": "2026-05-28T18:08:48.206Z",
+      "version": 1
+    },
+    {
+      "id": "drop",
+      "type": "rectangle",
+      "x": 900,
+      "y": 100,
+      "width": 120,
+      "height": 70,
+      "backgroundColor": "#e9ecef",
+      "strokeColor": "#1e1e1e",
+      "label": {
+        "text": "Dropout\n0.25"
+      },
+      "fontSize": 14,
+      "createdAt": "2026-05-28T18:08:48.206Z",
+      "updatedAt": "2026-05-28T18:08:48.206Z",
+      "version": 1
+    },
+    {
+      "id": "ha",
+      "type": "rectangle",
+      "x": 720,
+      "y": 240,
+      "width": 150,
+      "height": 60,
+      "backgroundColor": "#ffc9c9",
+      "strokeColor": "#e03131",
+      "label": {
+        "text": "Head Aspect"
+      },
+      "fontSize": 14,
+      "createdAt": "2026-05-28T18:08:48.206Z",
+      "updatedAt": "2026-05-28T18:08:48.206Z",
+      "version": 1
+    },
+    {
+      "id": "hs",
+      "type": "rectangle",
+      "x": 900,
+      "y": 240,
+      "width": 150,
+      "height": 60,
+      "backgroundColor": "#ffc9c9",
+      "strokeColor": "#e03131",
+      "label": {
+        "text": "Head Sentiment"
+      },
+      "fontSize": 14,
+      "createdAt": "2026-05-28T18:08:48.206Z",
+      "updatedAt": "2026-05-28T18:08:48.206Z",
+      "version": 1
+    },
+    {
+      "id": "b1",
+      "type": "arrow",
+      "x": 208,
+      "y": 135,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          24,
+          0
+        ]
+      ],
+      "start": {
+        "id": "txt"
+      },
+      "end": {
+        "id": "tok"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-05-28T18:08:48.206Z",
+      "updatedAt": "2026-05-28T18:08:48.206Z",
+      "version": 1
+    },
+    {
+      "id": "b2",
+      "type": "arrow",
+      "x": 428,
+      "y": 135,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          24,
+          0
+        ]
+      ],
+      "start": {
+        "id": "tok"
+      },
+      "end": {
+        "id": "enc"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-05-28T18:08:48.206Z",
+      "updatedAt": "2026-05-28T18:08:48.206Z",
+      "version": 1
+    },
+    {
+      "id": "b3",
+      "type": "arrow",
+      "x": 688,
+      "y": 135,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          24,
+          0
+        ]
+      ],
+      "start": {
+        "id": "enc"
+      },
+      "end": {
+        "id": "cls"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-05-28T18:08:48.206Z",
+      "updatedAt": "2026-05-28T18:08:48.206Z",
+      "version": 1
+    },
+    {
+      "id": "b4",
+      "type": "arrow",
+      "x": 868,
+      "y": 135,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          24,
+          0
+        ]
+      ],
+      "start": {
+        "id": "cls"
+      },
+      "end": {
+        "id": "drop"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-05-28T18:08:48.206Z",
+      "updatedAt": "2026-05-28T18:08:48.206Z",
+      "version": 1
+    },
+    {
+      "id": "b5",
+      "type": "arrow",
+      "x": 911.0305638285957,
+      "y": 175.0659023220581,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -73.17223876830258,
+          59.86819535588381
+        ]
+      ],
+      "start": {
+        "id": "drop"
+      },
+      "end": {
+        "id": "ha"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-05-28T18:08:48.206Z",
+      "updatedAt": "2026-05-28T18:08:48.206Z",
+      "version": 1
+    },
+    {
+      "id": "b6",
+      "type": "arrow",
+      "x": 964.7723410974877,
+      "y": 177.95106987738896,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          6.010873360580149,
+          54.09786024522208
+        ]
+      ],
+      "start": {
+        "id": "drop"
+      },
+      "end": {
+        "id": "hs"
+      },
+      "endArrowhead": "arrow",
+      "createdAt": "2026-05-28T18:08:48.206Z",
+      "updatedAt": "2026-05-28T18:08:48.206Z",
+      "version": 1
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#ffffff",
+    "gridSize": null
+  }
+}

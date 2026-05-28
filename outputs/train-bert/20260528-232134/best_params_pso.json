@@ -19,6 +19,5 @@
     "max_len": 128,
     "patience": 8
   },
-  "best_objective": -0.7117,
-  "note": "Best avg F1 = 0.7117 (aspect_f1=0.5497 + sentiment_f1=0.8736) / 2"
+  "best_objective": -0.7117
 }

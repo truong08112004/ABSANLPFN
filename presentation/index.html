@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sentiment Analysis on Review Text</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" />
+    <link rel="stylesheet" href="css/custom.css" />
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section class="slide-title">
+          <div class="title-inner">
+            <h1 class="title-main">
+              Aspect-Based Sentiment Analysis with Deep Learning: a Multitask
+              Approach
+            </h1>
+            <p class="title-sub">Aspect + sentiment · CNN+BiLSTM vs BERT</p>
+          </div>
+        </section>
+
+        <section class="slide-paper">
+          <h2>Following the paper</h2>
+          <p class="lead">
+            Model A implements the <strong>MABSA</strong> flow: GloVe/POS →
+            CNN(3) → BiLSTM → pooling → multitask heads.
+          </p>
+          <img
+            src="assets/paperimage.jpg"
+            alt="Paper architecture — Tran et al."
+            class="paper-figure" />
+          <p class="paper-caption small muted">
+            Trang Uyen Tran et al. — integrated CNN–BiLSTM for multitask ABSA
+          </p>
+        </section>
+
+        <section>
+          <h2>Problem</h2>
+          <p class="lead">
+            ABSA: predict <strong>what</strong> the review is about and
+            <strong>how</strong> the author feels — from one English review.
+          </p>
+          <ul>
+            <li>
+              <strong>Input</strong>: <code>reviewText</code> (transport-domain
+              reviews)
+            </li>
+            <li>
+              <strong>Task 1 — Aspect</strong>: multi-class (e.g. Convenience,
+              Staff quality, Facilities)
+            </li>
+            <li>
+              <strong>Task 2 — Sentiment</strong>: Positive, Neutral, or
+              Negative
+            </li>
+            <li>
+              <strong>Multitask</strong>: one shared encoder, two heads —
+              context helps both tasks
+            </li>
+          </ul>
+        </section>
+
+        <section class="slide-dataset">
+          <h2>Dataset</h2>
+          <p class="dataset-summary">
+            <strong>103,934</strong> reviews · experiments:
+            <strong>30,000</strong> (seed 42) · split 70% / 15% / 15%
+          </p>
+          <div class="data-dist-grid">
+            <div>
+              <h3>Sentiment</h3>
+              <table class="dist-table">
+                <tbody>
+                  <tr>
+                    <td>Positive</td>
+                    <td>59,413</td>
+                    <td>57.2%</td>
+                    <td><span class="dist-bar" style="width: 57.2%"></span></td>
+                  </tr>
+                  <tr>
+                    <td>Negative</td>
+                    <td>31,743</td>
+                    <td>30.5%</td>
+                    <td>
+                      <span class="dist-bar neg" style="width: 30.5%"></span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Neutral</td>
+                    <td>12,778</td>
+                    <td>12.3%</td>
+                    <td>
+                      <span class="dist-bar neu" style="width: 12.3%"></span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div>
+              <h3>Aspect</h3>
+              <table class="dist-table dist-table-compact">
+                <tbody>
+                  <tr>
+                    <td>Convenience</td>
+                    <td>31,329</td>
+                    <td>30.1%</td>
+                    <td><span class="dist-bar" style="width: 30.1%"></span></td>
+                  </tr>
+                  <tr>
+                    <td>Staff quality</td>
+                    <td>13,388</td>
+                    <td>12.9%</td>
+                    <td><span class="dist-bar" style="width: 12.9%"></span></td>
+                  </tr>
+                  <tr>
+                    <td>Data availability</td>
+                    <td>10,314</td>
+                    <td>9.9%</td>
+                    <td><span class="dist-bar" style="width: 9.9%"></span></td>
+                  </tr>
+                  <tr>
+                    <td>Cleanliness</td>
+                    <td>9,531</td>
+                    <td>9.2%</td>
+                    <td><span class="dist-bar" style="width: 9.2%"></span></td>
+                  </tr>
+                  <tr>
+                    <td>Facilities</td>
+                    <td>9,462</td>
+                    <td>9.1%</td>
+                    <td><span class="dist-bar" style="width: 9.1%"></span></td>
+                  </tr>
+                  <tr>
+                    <td>Positive</td>
+                    <td>9,300</td>
+                    <td>8.9%</td>
+                    <td><span class="dist-bar" style="width: 8.9%"></span></td>
+                  </tr>
+                  <tr>
+                    <td>Safety</td>
+                    <td>9,101</td>
+                    <td>8.8%</td>
+                    <td><span class="dist-bar" style="width: 8.8%"></span></td>
+                  </tr>
+                  <tr>
+                    <td>Accessibility</td>
+                    <td>8,131</td>
+                    <td>7.8%</td>
+                    <td><span class="dist-bar" style="width: 7.8%"></span></td>
+                  </tr>
+                  <tr>
+                    <td>Punctuality</td>
+                    <td>1,512</td>
+                    <td>1.5%</td>
+                    <td><span class="dist-bar" style="width: 1.5%"></span></td>
+                  </tr>
+                  <tr>
+                    <td>Price fairness</td>
+                    <td>1,180</td>
+                    <td>1.1%</td>
+                    <td><span class="dist-bar" style="width: 1.1%"></span></td>
+                  </tr>
+                  <tr>
+                    <td>Neutral</td>
+                    <td>557</td>
+                    <td>0.5%</td>
+                    <td><span class="dist-bar" style="width: 0.5%"></span></td>
+                  </tr>
+                  <tr>
+                    <td>Negative</td>
+                    <td>120</td>
+                    <td>0.1%</td>
+                    <td><span class="dist-bar" style="width: 0.1%"></span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="slide-visual-only">
+          <h2>Multitask learning</h2>
+          <img
+            src="assets/diagrams/05-multitask-loss.png"
+            alt="Multitask"
+            class="diagram hero" />
+        </section>
+
+        <section>
+          <h2>Pipeline</h2>
+          <div class="slide-split">
+            <div class="visual-main">
+              <img
+                src="assets/diagrams/01-pipeline-flow.png"
+                alt="Pipeline"
+                class="diagram hero" />
+            </div>
+            <div class="explain-side">
+              <div class="explain">
+                <ul>
+                  <li>Same CSV &amp; split for both models</li>
+                  <li>
+                    <strong>Preprocess</strong> → token IDs (+ POS for LSTM)
+                  </li>
+                  <li><strong>Model A</strong>: CNN + BiLSTM</li>
+                  <li><strong>Model B</strong>: fine-tuned BERT</li>
+                  <li>
+                    Both → <strong>two softmax heads</strong> + combined loss
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="slide-visual-only">
+          <h2>Preprocessing</h2>
+          <img
+            src="assets/diagrams/03-data-preprocessing.png"
+            alt="Preprocessing"
+            class="diagram hero" />
+        </section>
+
+        <section>
+          <h2>Model A — CNN + BiLSTM</h2>
+          <div class="slide-split">
+            <div class="visual-main">
+              <img
+                src="assets/diagrams/02-model-lstm-layers.png"
+                alt="CNN BiLSTM"
+                class="diagram hero" />
+            </div>
+            <div class="explain-side">
+              <div class="explain">
+                <ul>
+                  <li>100-d embeddings + one-hot POS</li>
+                  <li><strong>3× Conv1d</strong> — local n-gram features</li>
+                  <li><strong>BiLSTM</strong> — long-range context</li>
+                  <li>Avg pool → shared vector → two heads</li>
+                </ul>
+                <span class="small muted">100 ep · bs 128 · lr 1e-3</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Model B — BERT</h2>
+          <div class="slide-split">
+            <div class="visual-main">
+              <img
+                src="assets/diagrams/04-model-bert-layers.png"
+                alt="BERT"
+                class="diagram hero" />
+            </div>
+            <div class="explain-side">
+              <div class="explain">
+                <ul>
+                  <li><code>bert-base-uncased</code> — 12 layers, 768-d</li>
+                  <li><strong>CLS</strong> summarizes the review</li>
+                  <li>Same multitask heads as Model A</li>
+                  <li>Fine-tune pretrained English → domain reviews</li>
+                </ul>
+                <span class="small muted"
+                  >5 ep · bs 64 · lr 2e-5 · max_len 128</span
+                >
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h2>Results</h2>
+          <table class="metrics">
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Aspect Acc</th>
+                <th>Aspect F1</th>
+                <th>Sentiment Acc</th>
+                <th>Sentiment F1</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>CNN + BiLSTM</strong></td>
+                <td>60.1%</td>
+                <td>45.2%</td>
+                <td>86.9%</td>
+                <td>78.1%</td>
+              </tr>
+              <tr class="highlight-row">
+                <td><strong>BERT</strong></td>
+                <td>70.7%</td>
+                <td>54.6%</td>
+                <td>93.0%</td>
+                <td>87.4%</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="slide-visual-only">
+          <h2>Training — CNN + BiLSTM</h2>
+          <img
+            src="assets/lstm_training_curves.png"
+            alt="LSTM curves"
+            class="chart" />
+        </section>
+
+        <section class="slide-visual-only">
+          <h2>Confusion matrix — CNN + BiLSTM</h2>
+          <img
+            src="assets/lstm_confusion_matrix.png"
+            alt="LSTM confusion"
+            class="chart" />
+        </section>
+
+        <section class="slide-visual-only">
+          <h2>Training — BERT</h2>
+          <img
+            src="assets/bert_training_curves.png"
+            alt="BERT curves"
+            class="chart" />
+        </section>
+
+        <section class="slide-visual-only">
+          <h2>Confusion matrix — BERT</h2>
+          <img
+            src="assets/bert_confusion_matrix.png"
+            alt="BERT confusion"
+            class="chart" />
+        </section>
+
+        <section>
+          <h2>Takeaways</h2>
+          <ul>
+            <li>One encoder, two heads</li>
+            <li><strong>BERT</strong> wins on aspect (+10.6% acc)</li>
+            <li><strong>CNN + BiLSTM</strong> lighter, no pretrain</li>
+          </ul>
+        </section>
+
+        <!-- ========== APPENDIX ========== -->
+
+        <section class="appendix-divider" data-background-color="#f8f9fa">
+          <p class="appendix-tag">Appendix</p>
+          <h1>Architecture reference</h1>
+        </section>
+
+        <section class="appendix-only slide-visual-only">
+          <span class="appendix-tag">Appendix A</span>
+          <h2>CNN + BiLSTM</h2>
+          <img
+            src="assets/diagrams/02-model-lstm-layers.png"
+            alt="LSTM architecture"
+            class="diagram hero" />
+        </section>
+
+        <section class="appendix-only">
+          <span class="appendix-tag">Appendix A</span>
+          <h2>CNN + BiLSTM — layers (1/2)</h2>
+          <div class="slide-table-full">
+            <table class="spec-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Layer</th>
+                  <th>Config</th>
+                  <th>Shape</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td>Word embedding</td>
+                  <td><code>Embedding(vocab, 100)</code></td>
+                  <td><code>[B, L, 100]</code></td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td>POS one-hot</td>
+                  <td>vocab=3</td>
+                  <td><code>[B, L, 3]</code></td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td>Concat</td>
+                  <td>word ∥ POS</td>
+                  <td><code>[B, L, 103]</code></td>
+                </tr>
+                <tr>
+                  <td>4–6</td>
+                  <td>CNN ×3</td>
+                  <td>Conv1d k=3, 128 ch</td>
+                  <td><code>[B, L, 128]</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="appendix-only">
+          <span class="appendix-tag">Appendix A</span>
+          <h2>CNN + BiLSTM — layers (2/2)</h2>
+          <div class="slide-table-full">
+            <table class="spec-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Layer</th>
+                  <th>Config</th>
+                  <th>Shape</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>7</td>
+                  <td>BiLSTM</td>
+                  <td>hidden=128, bidirectional</td>
+                  <td><code>[B, L, 256]</code></td>
+                </tr>
+                <tr>
+                  <td>8</td>
+                  <td>Avg pool</td>
+                  <td><code>mean(dim=1)</code></td>
+                  <td><code>[B, 256]</code></td>
+                </tr>
+                <tr>
+                  <td>9</td>
+                  <td>FC</td>
+                  <td>256→256</td>
+                  <td><code>[B, 256]</code></td>
+                </tr>
+                <tr>
+                  <td>10</td>
+                  <td>Head aspect</td>
+                  <td>Linear(256→13)</td>
+                  <td><code>[B, 13]</code></td>
+                </tr>
+                <tr>
+                  <td>11</td>
+                  <td>Head sentiment</td>
+                  <td>Linear(256→4)</td>
+                  <td><code>[B, 4]</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="appendix-only">
+          <span class="appendix-tag">Appendix A</span>
+          <h2>CNN + BiLSTM — spec</h2>
+          <table class="spec-table">
+            <tbody>
+              <tr>
+                <td>Class</td>
+                <td><code>MultitaskAbsaModel</code></td>
+              </tr>
+              <tr>
+                <td>Input</td>
+                <td><code>word_ids</code>, <code>pos_ids</code> · L=62</td>
+              </tr>
+              <tr>
+                <td>Output</td>
+                <td>13 aspect · 4 sentiment</td>
+              </tr>
+              <tr>
+                <td>Loss</td>
+                <td>CE(aspect) + CE(sentiment)</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="appendix-only slide-visual-only">
+          <span class="appendix-tag">Appendix B</span>
+          <h2>BERT</h2>
+          <img
+            src="assets/diagrams/04-model-bert-layers.png"
+            alt="BERT architecture"
+            class="diagram hero" />
+        </section>
+
+        <section class="appendix-only">
+          <span class="appendix-tag">Appendix B</span>
+          <h2>BERT — spec</h2>
+          <table class="spec-table">
+            <tbody>
+              <tr>
+                <td>Class</td>
+                <td><code>TransformerMtlModel</code></td>
+              </tr>
+              <tr>
+                <td>Checkpoint</td>
+                <td><code>bert-base-uncased</code></td>
+              </tr>
+              <tr>
+                <td>Input</td>
+                <td>
+                  <code>input_ids</code>, <code>attention_mask</code> · L=128
+                </td>
+              </tr>
+              <tr>
+                <td>Representation</td>
+                <td>CLS → 768-d</td>
+              </tr>
+              <tr>
+                <td>Heads</td>
+                <td>Linear(768→13), Linear(768→4)</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="appendix-only">
+          <span class="appendix-tag">Appendix</span>
+          <h2>Comparison</h2>
+          <table
+            class="spec-table metrics"
+            style="font-size: 0.58em; max-width: 1000px">
+            <thead>
+              <tr>
+                <th></th>
+                <th>CNN + BiLSTM</th>
+                <th>BERT</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Tokenization</td>
+                <td>Word-level + POS</td>
+                <td>WordPiece</td>
+              </tr>
+              <tr>
+                <td>Seq length</td>
+                <td>62</td>
+                <td>128</td>
+              </tr>
+              <tr>
+                <td>Backbone</td>
+                <td>3 CNN + BiLSTM</td>
+                <td>12 Transformer</td>
+              </tr>
+              <tr>
+                <td>Dim</td>
+                <td>256</td>
+                <td>768</td>
+              </tr>
+              <tr>
+                <td>Pretrained</td>
+                <td>No</td>
+                <td>Yes</td>
+              </tr>
+              <tr>
+                <td>Train</td>
+                <td>100 ep</td>
+                <td>5 ep</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="slide-references">
+          <h2>References</h2>
+          <ol class="refs">
+            <li>
+              <strong>Trang Uyen Tran</strong>, Ha Thanh Thi Hoang, Phuong Hoai
+              Dang, Michel Riveill.
+              <em
+                >Multitask Aspect_Based Sentiment Analysis with Integrated
+                Bidirectional LSTM &amp; CNN Model</em
+              >.
+              <em
+                >Proc. 4th Int. Conf. Future Networks and Distributed Systems
+                (ICFNDS)</em
+              >, 2020.
+              <a
+                href="https://doi.org/10.1145/3440749.3442656"
+                target="_blank"
+                rel="noopener"
+                >doi:10.1145/3440749.3442656</a
+              >
+            </li>
+            <li>
+              Dataset: <code>ok050824.csv</code> — English transport-domain
+              reviews with aspect and sentiment labels.
+            </li>
+          </ol>
+        </section>
+
+        <section
+          class="slide-closing"
+          data-background-gradient="linear-gradient(160deg, #0b1f3a 0%, #1971c2 45%, #5c3d99 100%)">
+          <div class="closing-inner">
+            <h1 class="closing-main">Thank you</h1>
+            <p class="closing-sub">Questions</p>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+    <script>
+      Reveal.initialize({
+        hash: true,
+        slideNumber: "c/t",
+        transition: "none",
+        width: 1280,
+        height: 720,
+      });
+    </script>
+  </body>
+</html>
