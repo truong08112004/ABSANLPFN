@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import random
@@ -32,6 +33,11 @@ try:
 except Exception:  # pragma: no cover
     AutoTokenizer = None
 
+try:
+    import nlpaug.augmenter.word as naw
+except Exception:  # pragma: no cover
+    naw = None
+
 
 @dataclass(frozen=True)
 class TaskMetrics:
@@ -54,6 +60,17 @@ class RunArtifacts:
     history: List[Dict[str, float]]
     best_epoch: int
     total_epochs: int
+
+
+@dataclass(frozen=True)
+class BalanceArtifacts:
+    texts_train: List[str]
+    aspects_train: List[str]
+    sentiments_train: List[str]
+    before_counts: Dict[str, int]
+    after_counts: Dict[str, int]
+    log_rows: List[Dict[str, str]]
+    summary: Dict[str, object]
 
 
 def set_seed(seed: int) -> None:
@@ -138,6 +155,151 @@ def _device(name: str) -> torch.device:
 
 def _round_to(options: Sequence[int], x: float) -> int:
     return min(options, key=lambda z: abs(z - x))
+
+
+def class_counts(labels: Sequence[str]) -> Dict[str, int]:
+    out: Dict[str, int] = {}
+    for lab in labels:
+        k = str(lab).strip()
+        out[k] = out.get(k, 0) + 1
+    return dict(sorted(out.items(), key=lambda kv: kv[0]))
+
+
+def _stable_hash(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+
+
+def write_class_distribution(path: Path, counts: Dict[str, int], *, label_col: str = "sentiment") -> None:
+    rows = [{label_col: k, "count": int(v)} for k, v in counts.items()]
+    pd.DataFrame(rows).sort_values(label_col).to_csv(path, index=False)
+
+
+def maybe_back_translate_balance(
+    *,
+    enable_back_translation: bool,
+    balance_target: str,
+    texts_train: List[str],
+    aspects_train: List[str],
+    sentiments_train: List[str],
+    bt_from_model: str,
+    bt_to_model: str,
+    bt_batch_size: int,
+    balance_max_per_class: int,
+    seed: int,
+) -> BalanceArtifacts:
+    before = class_counts(sentiments_train if balance_target == "sentiment" else aspects_train)
+    log_rows: List[Dict[str, str]] = []
+    if not enable_back_translation:
+        return BalanceArtifacts(
+            texts_train=texts_train,
+            aspects_train=aspects_train,
+            sentiments_train=sentiments_train,
+            before_counts=before,
+            after_counts=before,
+            log_rows=log_rows,
+            summary={
+                "enabled": False,
+                "method": "none",
+                "target": balance_target,
+                "before_counts": before,
+                "after_counts": before,
+                "generated": 0,
+                "failed": 0,
+            },
+        )
+
+    if naw is None:
+        raise SystemExit("Back-translation enabled but nlpaug is not available. Please install dependencies.")
+    if balance_target != "sentiment":
+        raise SystemExit("Current implementation supports --balance-target sentiment only.")
+    if not before:
+        raise SystemExit("Cannot balance empty training labels.")
+
+    target_count = max(before.values())
+    if balance_max_per_class > 0:
+        target_count = min(target_count, balance_max_per_class)
+
+    augmenter = naw.BackTranslationAug(
+        from_model_name=bt_from_model,
+        to_model_name=bt_to_model,
+        batch_size=max(1, int(bt_batch_size)),
+    )
+    rng = random.Random(seed)
+    grouped: Dict[str, List[int]] = {}
+    for i, sent in enumerate(sentiments_train):
+        grouped.setdefault(str(sent).strip(), []).append(i)
+
+    out_texts = list(texts_train)
+    out_aspects = list(aspects_train)
+    out_sentiments = list(sentiments_train)
+    failed = 0
+    generated = 0
+
+    for label, indices in sorted(grouped.items(), key=lambda kv: kv[0]):
+        need = max(0, target_count - len(indices))
+        if need == 0:
+            continue
+        if not indices:
+            continue
+        for step in range(need):
+            src_idx = rng.choice(indices)
+            src_text = texts_train[src_idx]
+            try:
+                bt_text = augmenter.augment(src_text)
+                if isinstance(bt_text, list):
+                    bt_text = bt_text[0] if bt_text else src_text
+                aug_text = str(bt_text).strip() or src_text
+                out_texts.append(aug_text)
+                out_aspects.append(aspects_train[src_idx])
+                out_sentiments.append(sentiments_train[src_idx])
+                generated += 1
+                log_rows.append(
+                    {
+                        "status": "ok",
+                        "label": label,
+                        "source_index": str(src_idx),
+                        "step": str(step),
+                        "source_hash": _stable_hash(src_text),
+                        "aug_hash": _stable_hash(aug_text),
+                    }
+                )
+            except Exception as ex:
+                failed += 1
+                log_rows.append(
+                    {
+                        "status": "failed",
+                        "label": label,
+                        "source_index": str(src_idx),
+                        "step": str(step),
+                        "source_hash": _stable_hash(src_text),
+                        "aug_hash": "",
+                        "error": str(ex),
+                    }
+                )
+
+    after = class_counts(out_sentiments)
+    summary = {
+        "enabled": True,
+        "method": "back_translation",
+        "target": balance_target,
+        "from_model": bt_from_model,
+        "to_model": bt_to_model,
+        "bt_batch_size": int(bt_batch_size),
+        "before_counts": before,
+        "after_counts": after,
+        "target_count_per_class": target_count,
+        "generated": generated,
+        "failed": failed,
+    }
+    return BalanceArtifacts(
+        texts_train=out_texts,
+        aspects_train=out_aspects,
+        sentiments_train=out_sentiments,
+        before_counts=before,
+        after_counts=after,
+        log_rows=log_rows,
+        summary=summary,
+    )
 
 
 def decode_params(arch: str, x: np.ndarray) -> Dict[str, float | int]:
@@ -574,6 +736,13 @@ def main(argv: List[str] | None = None) -> None:
     p.add_argument("--pso-epoch", type=int, default=15)
     p.add_argument("--pso-pop-size", type=int, default=12)
     p.add_argument("--out-dir", default="outputs/tuning")
+    p.add_argument("--enable-back-translation", action="store_true")
+    p.add_argument("--balance-target", default="sentiment", choices=["sentiment"])
+    p.add_argument("--balance-max-per-class", type=int, default=0, help="0 means no cap")
+    p.add_argument("--bt-from-model", default="Helsinki-NLP/opus-mt-en-fr")
+    p.add_argument("--bt-to-model", default="Helsinki-NLP/opus-mt-fr-en")
+    p.add_argument("--bt-batch-size", type=int, default=8)
+    p.add_argument("--bt-num-threads", type=int, default=1)
     args = p.parse_args(argv)
     if args.pso_pop_size < 5:
         raise SystemExit("--pso-pop-size must be >= 5 for mealpy PSO.")
@@ -600,6 +769,27 @@ def main(argv: List[str] | None = None) -> None:
     aspects_val = [aspects[i] for i in idx_val]
     sentiments_train = [sentiments[i] for i in idx_train]
     sentiments_val = [sentiments[i] for i in idx_val]
+
+    balance = maybe_back_translate_balance(
+        enable_back_translation=args.enable_back_translation,
+        balance_target=args.balance_target,
+        texts_train=texts_train,
+        aspects_train=aspects_train,
+        sentiments_train=sentiments_train,
+        bt_from_model=args.bt_from_model,
+        bt_to_model=args.bt_to_model,
+        bt_batch_size=args.bt_batch_size,
+        balance_max_per_class=args.balance_max_per_class,
+        seed=args.seed,
+    )
+    texts_train = balance.texts_train
+    aspects_train = balance.aspects_train
+    sentiments_train = balance.sentiments_train
+
+    write_class_distribution(run_dir / "class_distribution_before_balance.csv", balance.before_counts)
+    write_class_distribution(run_dir / "class_distribution_after_balance.csv", balance.after_counts)
+    pd.DataFrame(balance.log_rows).to_csv(run_dir / "augmentation_log.csv", index=False)
+    (run_dir / "balance_summary.json").write_text(json.dumps(balance.summary, indent=2), encoding="utf-8")
 
     aspect_vocab = build_label_vocab(aspects_train)
     sentiment_vocab = build_label_vocab(sentiments_train)
@@ -690,9 +880,38 @@ def main(argv: List[str] | None = None) -> None:
             f"best_params={best_params}"
         )
 
+    run_config = {
+        "csv": args.csv,
+        "seed": args.seed,
+        "max_samples": args.max_samples,
+        "train_epochs": args.train_epochs,
+        "pso_epoch": args.pso_epoch,
+        "pso_pop_size": args.pso_pop_size,
+        "transformer_name": args.transformer_name,
+        "device": str(device),
+        "enable_back_translation": args.enable_back_translation,
+        "balance_target": args.balance_target,
+        "balance_max_per_class": args.balance_max_per_class,
+        "bt_from_model": args.bt_from_model,
+        "bt_to_model": args.bt_to_model,
+        "bt_batch_size": args.bt_batch_size,
+        "bt_num_threads": args.bt_num_threads,
+        "dataset_size_before_split": len(texts),
+        "train_size_after_balance": len(texts_train),
+        "val_size": len(texts_val),
+        "balance_summary_file": "balance_summary.json",
+    }
+    (run_dir / "run_config.json").write_text(json.dumps(run_config, indent=2), encoding="utf-8")
+
     final_df = pd.DataFrame(all_rows)
     final_df.to_csv(run_dir / "final_metrics.csv", index=False)
     (run_dir / "final_metrics.md").write_text(dataframe_to_markdown(final_df), encoding="utf-8")
+    notes.append(
+        "- balancing: "
+        f"enabled={balance.summary.get('enabled')} "
+        f"generated={balance.summary.get('generated')} "
+        f"failed={balance.summary.get('failed')}"
+    )
     write_report(run_dir / "report.md", run_dir, all_rows, "\n".join(notes))
     print(f"Tuning completed. Artifacts saved at: {run_dir}")
 

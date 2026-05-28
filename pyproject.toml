@@ -11,9 +11,11 @@ dependencies = [
   "torch>=2.5",
   "tqdm>=4.66",
   "nltk>=3.9",
-  "transformers>=4.45",
+  "transformers>=4.45,<5",
   "mealpy",
   "matplotlib>=3.9",
+  "nlpaug",
+  "sentencepiece>=0.2",
 ]
 
 [project.scripts]
