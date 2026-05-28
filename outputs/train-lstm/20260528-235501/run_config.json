@@ -1,0 +1,23 @@
+{
+  "csv": "C:\\Users\\Administrator\\Desktop\\ABSANLPFN - Copy\\ok050824.csv",
+  "arch": "paper",
+  "transformer_name": null,
+  "max_samples": 30000,
+  "total_csv_rows": 103923,
+  "used_samples": 30000,
+  "train_samples": 21012,
+  "val_samples": 4488,
+  "test_samples": 4500,
+  "split": "70/15/15 (train/val/test)",
+  "epochs": 100,
+  "batch_size": 128,
+  "lr": 0.001,
+  "dropout": 0.25,
+  "max_len": 62,
+  "device": "cuda",
+  "aspect_classes": 13,
+  "sentiment_classes": 4,
+  "run_id": "20260528-235501",
+  "vocab_size": 12884,
+  "pos_vocab_size": 3
+}

@@ -1,0 +1,24 @@
+{
+  "validation": {
+    "loss": 1.6292506059010823,
+    "aspect_accuracy": 0.5877896613190731,
+    "aspect_precision": 0.4759897033403091,
+    "aspect_recall": 0.43831831920336145,
+    "aspect_f1": 0.44646144214881334,
+    "sentiment_accuracy": 0.8634135472370766,
+    "sentiment_precision": 0.7883439874100929,
+    "sentiment_recall": 0.7894781015678255,
+    "sentiment_f1": 0.7885140827203864
+  },
+  "test": {
+    "loss": 1.5590309533807967,
+    "aspect_accuracy": 0.6013333333333334,
+    "aspect_precision": 0.48744138615837035,
+    "aspect_recall": 0.4415004970201221,
+    "aspect_f1": 0.4516195725372716,
+    "sentiment_accuracy": 0.8686666666666667,
+    "sentiment_precision": 0.7809326098053964,
+    "sentiment_recall": 0.7812145125820846,
+    "sentiment_f1": 0.7809835868933744
+  }
+}

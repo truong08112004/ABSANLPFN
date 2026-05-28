@@ -1,0 +1,19 @@
+{
+  "csv": "C:\\Users\\Administrator\\Desktop\\ABSANLPFN - Copy\\ok050824.csv",
+  "arch": "bert",
+  "transformer_name": "bert-base-uncased",
+  "max_samples": 30000,
+  "total_csv_rows": 103923,
+  "used_samples": 30000,
+  "train_samples": 25500,
+  "val_samples": 4500,
+  "epochs": 5,
+  "batch_size": 64,
+  "lr": 2e-05,
+  "dropout": 0.25,
+  "max_len": 128,
+  "device": "cuda",
+  "aspect_classes": 13,
+  "sentiment_classes": 4,
+  "run_id": "20260528-222516"
+}

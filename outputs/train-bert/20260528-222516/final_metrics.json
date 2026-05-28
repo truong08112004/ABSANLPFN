@@ -1,0 +1,10 @@
+{
+  "aspect_accuracy": 0.7168888888888889,
+  "aspect_precision": 0.5718366588275815,
+  "aspect_recall": 0.541172227084394,
+  "aspect_f1": 0.549708852476902,
+  "sentiment_accuracy": 0.9351111111111111,
+  "sentiment_precision": 0.8995283135295477,
+  "sentiment_recall": 0.8556880246879625,
+  "sentiment_f1": 0.8735944245730695
+}

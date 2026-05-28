@@ -1,0 +1,24 @@
+{
+  "method": "PSO (Particle Swarm Optimization)",
+  "pso_config": {
+    "pso_epoch": 15,
+    "pso_pop_size": 12,
+    "objective": "maximize average macro-F1 (aspect + sentiment)",
+    "search_space": {
+      "lr": [1e-5, 3e-4],
+      "dropout": [0.05, 0.3],
+      "batch_size": [16, 32, 64, 128],
+      "max_len": [32, 48, 62, 80, 96, 128],
+      "patience": [2, 12]
+    }
+  },
+  "best_params": {
+    "lr": 2e-5,
+    "dropout": 0.1,
+    "batch_size": 64,
+    "max_len": 128,
+    "patience": 8
+  },
+  "best_objective": -0.7117,
+  "note": "Best avg F1 = 0.7117 (aspect_f1=0.5497 + sentiment_f1=0.8736) / 2"
+}
