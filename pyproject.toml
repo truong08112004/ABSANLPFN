@@ -1,0 +1,24 @@
+[project]
+name = "absa-multitask"
+version = "0.1.0"
+description = "Multitask ABSA (CNN + BiLSTM) following the paper flow"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "numpy>=2.0",
+  "pandas>=2.2",
+  "scikit-learn>=1.5",
+  "torch>=2.5",
+  "tqdm>=4.66",
+  "nltk>=3.9",
+  "transformers>=4.45",
+]
+
+[project.scripts]
+absa-train = "absa_multitask.train:main"
+absa-compare = "absa_multitask.compare:main"
+
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
