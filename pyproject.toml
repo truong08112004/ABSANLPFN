@@ -12,11 +12,14 @@ dependencies = [
   "tqdm>=4.66",
   "nltk>=3.9",
   "transformers>=4.45",
+  "mealpy",
+  "matplotlib>=3.9",
 ]
 
 [project.scripts]
 absa-train = "absa_multitask.train:main"
 absa-compare = "absa_multitask.compare:main"
+absa-tune = "absa_multitask.tune:main"
 
 [build-system]
 requires = ["hatchling>=1.25"]
